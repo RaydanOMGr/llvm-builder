@@ -85,7 +85,13 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=/opt/llvm \
             -DLLVM_ENABLE_RUNTIMES="libclc" \
             -DLLVM_TARGETS_TO_BUILD="X86;SPIRV" \
-            -DLLVM_ENABLE_ZLIB=OFF
+            -DLLVM_ENABLE_ZLIB=OFF \
+            -DLLVM_BUILD_TESTS=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_BUILD_BENCHMARKS=OFF \
+            -DLLVM_BUILD_UTILS=OFF
 
       - name: Build libclc
         run: |
