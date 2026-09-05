@@ -87,7 +87,7 @@ jobs:
         run: |
           ninja \
             -C llvm-build \
-            -j"$(nproc)" \
+            -j12 \
             libclc
 
       - name: Install libclc
