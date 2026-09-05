@@ -98,7 +98,7 @@ jobs:
       - name: Build libclc
         run: |
           ninja \
-            -C llvm-build \
+            -C llvm-build 'runtimes/spirv64-unknown-unknown/libclc' \
             -j12
 
       - name: Install libclc
