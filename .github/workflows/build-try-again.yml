@@ -36,7 +36,7 @@ jobs:
             | gpg --dearmor \
             | sudo tee /usr/share/keyrings/llvm.gpg > /dev/null
 
-          echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/ubuntu noble llvm-toolchain-${LLVM_VERSION}" \
+          echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/ubuntu noble llvm-toolchain-noble-${LLVM_VERSION}" \
             | sudo tee /etc/apt/sources.list.d/llvm.list
 
           sudo apt-get update
