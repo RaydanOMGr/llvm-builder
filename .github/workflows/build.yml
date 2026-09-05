@@ -12,7 +12,7 @@ permissions:
 jobs:
   build-libclc:
     name: Build libclc
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout
