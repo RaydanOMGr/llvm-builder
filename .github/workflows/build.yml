@@ -66,6 +66,7 @@ jobs:
       - name: Clone LLVM
         run: |
           git clone \
+            --branch llvmorg-23-init --single-branch \
             --depth=1 \
             https://github.com/llvm/llvm-project.git \
             llvm-project
