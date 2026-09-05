@@ -1,0 +1,68 @@
+```yaml
+name: Build libclc
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-libclc:
+    name: Build libclc
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            ninja-build \
+            pkg-config
+
+      - name: Build libclc
+        run: |
+          git clone --depth=1 https://github.com/llvm/llvm-project.git llvm-project
+
+          cmake -S llvm-project/llvm -B llvm-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/opt/llvm \
+            -DLLVM_ENABLE_PROJECTS="clang" \
+            -DLLVM_ENABLE_RUNTIMES="libclc"
+
+          ninja -C llvm-build -j"$(nproc)" libclc
+
+          sudo ninja -C llvm-build install
+
+          pkg-config --modversion libclc || true
+          pkg-config --variable=prefix libclc || true
+
+      - name: Package libclc
+        run: |
+          mkdir -p package
+
+          sudo tar \
+            -C /opt \
+            -czf package/libclc-linux-x86_64.tar.gz \
+            llvm
+
+          sudo chown "$USER:$USER" package/libclc-linux-x86_64.tar.gz
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libclc-linux-x86_64
+          path: package/libclc-linux-x86_64.tar.gz
+          if-no-files-found: error
+
+      - name: Upload release asset
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: package/libclc-linux-x86_64.tar.gz
+          generate_release_notes: true
+```
