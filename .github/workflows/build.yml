@@ -71,6 +71,13 @@ jobs:
             https://github.com/llvm/llvm-project.git \
             llvm-project
 
+      - name: Apply patches
+        run: | 
+          pushd llvm-project
+          chmod +x ../scripts/apply-patches.sh
+          ../scripts/apply-patches.sh
+          popd
+
       - name: Configure LLVM
         run: |
           cmake \
