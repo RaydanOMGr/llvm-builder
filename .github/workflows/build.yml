@@ -76,7 +76,7 @@ jobs:
             -S llvm-project/llvm \
             -B llvm-build \
             -G Ninja \
-            -C llvm-project/libclc/cmake/caches/spirv.cmake \
+            -C spirv.cmake \
             -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI=x86_64 \
             -DANDROID_PLATFORM=android-29 \
