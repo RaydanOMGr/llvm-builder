@@ -80,6 +80,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=/opt/llvm \
             -DLLVM_ENABLE_PROJECTS="clang" \
             -DLLVM_ENABLE_RUNTIMES="libclc" \
+            -DLLVM_TARGETS_TO_BUILD="X86;SPIRV" \
             -DLLVM_RUNTIME_TARGETS="spirv64-unknown-unknown" \
             -DRUNTIMES_spirv64-unknown-unknown_LLVM_ENABLE_RUNTIMES=libclc
 
@@ -87,7 +88,7 @@ jobs:
         run: |
           ninja \
             -C llvm-build \
-            -j12 \
+            -j16 \
             libclc
 
       - name: Install libclc
