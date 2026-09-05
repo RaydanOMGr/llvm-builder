@@ -17,28 +17,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+        
       - name: Prepare environment
         run: |
-          sudo sed -i \
-            's/^Types: deb$/Types: deb deb-src/' \
-            /etc/apt/sources.list
-
-          sudo apt update
-
-          sudo apt install -y \
-            build-essential \
+          sudo apt-get update
+      
+          sudo apt-get install -y \
+            ca-certificates \
             curl \
+            gnupg \
             unzip \
+            build-essential \
             flex \
             bison \
-            cmake \
             ninja-build \
             pkg-config \
             glslang-tools \
             meson \
             python3-mako \
             python3-markdown
+      
+          # Install a current CMake from Kitware
+          curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg > /dev/null
+      
+          echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(. /etc/os-release && echo "$VERSION_CODENAME") main" \
+            | sudo tee /etc/apt/sources.list.d/kitware.list
+      
+          sudo apt-get update
+          sudo apt-get install -y cmake
+      
+          cmake --version
+          ninja --version
 
       - name: Install Android NDK
         run: |
