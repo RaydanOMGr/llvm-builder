@@ -1,0 +1,108 @@
+
+name: Build libclc workflow 2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    env:
+      LLVM_VERSION: "22"
+      LLVM_TAG: "llvmorg-22.1.8"
+      INSTALL_PREFIX: "${{ github.workspace }}/libclc-install"
+
+    steps:
+      - name: Install prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            wget \
+            gnupg \
+            ca-certificates \
+            git \
+            cmake \
+            ninja-build \
+            tar \
+            xz-utils
+
+      - name: Add LLVM APT repository
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/llvm.gpg > /dev/null
+
+          echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/ubuntu noble llvm-toolchain-${LLVM_VERSION}" \
+            | sudo tee /etc/apt/sources.list.d/llvm.list
+
+          sudo apt-get update
+
+      - name: Install LLVM 22
+        run: |
+          sudo apt-get install -y \
+            llvm-${LLVM_VERSION} \
+            llvm-${LLVM_VERSION}-dev \
+            llvm-${LLVM_VERSION}-tools \
+            clang-${LLVM_VERSION} \
+            lld-${LLVM_VERSION} \
+            libc++-${LLVM_VERSION}-dev \
+            libc++abi-${LLVM_VERSION}-dev
+
+      - name: Clone llvm-project
+        run: |
+          git clone \
+            --depth 1 \
+            --branch "${LLVM_TAG}" \
+            https://github.com/llvm/llvm-project.git
+
+      - name: Show LLVM installation
+        run: |
+          llvm-config-${LLVM_VERSION} --version
+          clang-${LLVM_VERSION} --version
+          llvm-config-${LLVM_VERSION} --cmakedir
+
+      - name: Configure libclc
+        run: |
+          cmake \
+            -S llvm-project/libclc \
+            -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
+            -DLLVM_DIR="/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/llvm"
+
+      - name: Build libclc
+        run: |
+          cmake --build build --parallel
+
+      - name: Install libclc
+        run: |
+          cmake --install build
+
+      - name: Package libclc
+        run: |
+          tar \
+            -C "${INSTALL_PREFIX}" \
+            -cJf "${GITHUB_WORKSPACE}/libclc-${LLVM_TAG#llvmorg-}-ubuntu-24.04-x86_64.tar.xz" \
+            .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libclc-22.1.8
+          path: libclc-22.1.8-ubuntu-24.04-x86_64.tar.xz
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create \
+            "libclc-${LLVM_TAG#llvmorg-}" \
+            "libclc-${LLVM_TAG#llvmorg-}-ubuntu-24.04-x86_64.tar.xz" \
+            --title "libclc ${LLVM_TAG#llvmorg-}" \
+            --generate-notes
