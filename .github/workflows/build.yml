@@ -76,13 +76,11 @@ jobs:
             -S llvm-project/llvm \
             -B llvm-build \
             -G Ninja \
+            -C llvm-project/libclc/cmake/caches/spirv.cmake \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=/opt/llvm \
-            -DLLVM_ENABLE_PROJECTS="clang" \
             -DLLVM_ENABLE_RUNTIMES="libclc" \
-            -DLLVM_TARGETS_TO_BUILD="X86;SPIRV" \
-            -DLLVM_RUNTIME_TARGETS="spirv64-unknown-unknown" \
-            -DRUNTIMES_spirv64-unknown-unknown_LLVM_ENABLE_RUNTIMES=libclc
+            -DLLVM_TARGETS_TO_BUILD="X86;SPIRV"
 
       - name: Build libclc
         run: |
